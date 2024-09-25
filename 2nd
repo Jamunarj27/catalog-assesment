@@ -1,0 +1,111 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+#include <cmath>
+#include <algorithm> // Include this header for std::sort
+
+using namespace std;
+
+// Function to convert a string from a given base to base 10 (decimal)
+long long baseToDecimal(const string& value, int base) {
+    long long result = 0;
+    for (char digit : value) {
+        result = result * base + (isdigit(digit) ? digit - '0' : toupper(digit) - 'A' + 10);
+    }
+    return result;
+}
+
+// Lagrange interpolation to find the polynomial's constant term (secret 'c')
+double lagrangeInterpolation(const vector<pair<int, long long>>& points, int k) {
+    double secret = 0;
+    
+    for (int i = 0; i < k; ++i) {
+        double xi = points[i].first;
+        double yi = points[i].second;
+
+        double li = 1.0; // Lagrange basis polynomial
+        for (int j = 0; j < k; ++j) {
+            if (i != j) {
+                double xj = points[j].first;
+                li *= (0 - xj) / (xi - xj); // li(0) for constant term
+            }
+        }
+        secret += yi * li;
+    }
+    
+    return secret;
+}
+
+int main() {
+    // Sample JSON-like input
+    string input = R"({
+        "keys": {
+            "n": 9,
+            "k": 6
+        },
+        "1": {
+            "base": "10",
+            "value": "28735619723837"
+        },
+        "2": {
+            "base": "16",
+            "value": "1A228867F0CA"
+        },
+        "3": {
+            "base": "12",
+            "value": "32811A4AA0B7B"
+        },
+        "4": {
+            "base": "11",
+            "value": "917978721331A"
+        },
+        "5": {
+            "base": "16",
+            "value": "1A22886782E1"
+        },
+        "6": {
+            "base": "10",
+            "value": "28735619654702"
+        },
+        "7": {
+            "base": "14",
+            "value": "71AB5070CC4B"
+        },
+        "8": {
+            "base": "9",
+            "value": "122662581541670"
+        },
+        "9": {
+            "base": "8",
+            "value": "642121030037605"
+        }
+    })";
+
+    // Decode the JSON-like input manually
+    int n = 9; // Example values for testing
+    int k = 6;
+
+    // Decode y values and store points
+    vector<pair<int, long long>> points;
+    points.push_back({1, baseToDecimal("28735619723837", 10)});
+    points.push_back({2, baseToDecimal("1A228867F0CA", 16)});
+    points.push_back({3, baseToDecimal("32811A4AA0B7B", 12)});
+    points.push_back({4, baseToDecimal("917978721331A", 11)});
+    points.push_back({5, baseToDecimal("1A22886782E1", 16)});
+    points.push_back({6, baseToDecimal("28735619654702", 10)});
+    points.push_back({7, baseToDecimal("71AB5070CC4B", 14)});
+    points.push_back({8, baseToDecimal("122662581541670", 9)});
+    points.push_back({9, baseToDecimal("642121030037605", 8)});
+
+    // Sort the points by x to ensure correct interpolation
+    sort(points.begin(), points.end());
+
+    // Find the constant term 'c' using Lagrange interpolation
+    double secret = lagrangeInterpolation(points, k);
+
+    // Output the result
+    cout << "The secret (constant term 'c') is: " << secret << endl;
+
+    return 0;
+}
